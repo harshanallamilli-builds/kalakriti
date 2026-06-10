@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #faf6f0;
+  --sand: #f0e8dc;
+  --linen: #e5d9c8;
+  --clay: #c49a6c;
+  --terracotta: #b85c38;
+  --saffron: #d4920a;
+  --sage: #6b8f71;
+  --moss: #4a6b52;
+  --charcoal: #3a322c;
+  --espresso: #1f1a17;
+  --warm-gray: #7a6f63;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-sand: var(--sand);
+  --color-linen: var(--linen);
+  --color-clay: var(--clay);
+  --color-terracotta: var(--terracotta);
+  --color-saffron: var(--saffron);
+  --color-sage: var(--sage);
+  --color-moss: var(--moss);
+  --color-charcoal: var(--charcoal);
+  --color-espresso: var(--espresso);
+  --color-warm-gray: var(--warm-gray);
+  --font-heading: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --shadow-soft: 0 4px 24px -4px rgb(58 50 44 / 0.08);
+  --shadow-lift: 0 12px 40px -8px rgb(58 50 44 / 0.14);
+  --shadow-card: 0 2px 16px -2px rgb(58 50 44 / 0.06);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--charcoal);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--saffron) 30%, transparent);
+  color: var(--espresso);
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out forwards;
+}
+
+.animation-delay-150 {
+  animation-delay: 150ms;
+}
+
+/* ── Grain texture ───────────────────────────────────────────── */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* ── Masonry grid ────────────────────────────────────────────── */
+.masonry-grid {
+  column-gap: 1rem;
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+/* Mobile: single column by default */
+@media (min-width: 480px) {
+  .masonry-grid { columns: 2; }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid { columns: 3; }
+}
+
+@media (min-width: 1280px) {
+  .masonry-grid { columns: 4; }
+}
+
+/* ── Touch improvements ─────────────────────────────────────── */
+button, [role="button"], a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea, select {
+  font-size: 16px; /* Prevents iOS auto-zoom on focus */
+}
+
+/* ── Scrollbar (webkit) ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--linen);
+  border-radius: 99px;
+}
+
+/* ── Loading skeleton ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--sand) 25%, var(--linen) 50%, var(--sand) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Chat message input safe area ──────────────────────────── */
+.chat-input-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* ── Smooth status badge transitions ───────────────────────── */
+.status-badge {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Unread dot pulse ───────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.unread-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Mobile nav bottom clearance ───────────────────────────── */
+/* Use on pages that need content above the mobile bottom nav */
+.pb-mobile-nav {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+/* ── Focus visible ring ─────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 2px;
+}
+
+/* ── Conversation list transition ──────────────────────────── */
+.conversation-item {
+  transition: background-color 0.15s ease;
+}
