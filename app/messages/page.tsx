@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { ConversationList } from "@/components/messages/ConversationList";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { getCurrentProfile } from "@/lib/queries/profiles";
 import { getUserConversations } from "@/lib/queries/messages";
 import type { Metadata } from "next";
@@ -12,23 +11,28 @@ export default async function MessagesPage() {
   if (!profile) redirect("/auth/login");
 
   const conversations = await getUserConversations(profile.id);
+  const totalUnread = conversations.reduce(
+    (n, c) => n + (c.unread_count ?? 0),
+    0
+  );
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 md:py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
           <h1 className="font-heading text-3xl text-charcoal">Messages</h1>
-          <p className="mt-1 text-sm text-warm-gray">
-            {profile.role === "creator"
-              ? "Conversations with your customers"
-              : "Your conversations with artisans"}
-          </p>
+          {conversations.length > 0 && (
+            <span className="rounded-full bg-sand px-3 py-1 text-sm text-warm-gray">
+              {conversations.length}
+            </span>
+          )}
         </div>
-        {conversations.length > 0 && (
-          <span className="rounded-full bg-sand px-3 py-1 text-sm text-warm-gray">
-            {conversations.length}
-          </span>
-        )}
+        <p className="mt-1 text-sm text-warm-gray">
+          {profile.role === "creator"
+            ? "Conversations with your customers"
+            : "Your conversations with artisans"}
+        </p>
       </div>
 
       <ConversationList

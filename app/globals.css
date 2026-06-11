@@ -34,7 +34,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -173,4 +172,11 @@ input, textarea, select {
 /* ── Conversation list transition ──────────────────────────── */
 .conversation-item {
   transition: background-color 0.15s ease;
+}
+
+/* ── Chat page: lock page scroll so only the message list scrolls ─── */
+html.chat-page,
+html.chat-page body {
+  overflow: hidden !important;
+  height: 100% !important;
 }

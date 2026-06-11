@@ -23,6 +23,8 @@ type AuthContextValue = {
    *  single realtime channel owned by AuthProvider — safe to read in any
    *  number of components without creating duplicate subscriptions. */
   unreadMessageCount: number;
+  /** Total unread notification count. Sourced from realtime channel in AuthProvider. */
+  unreadNotificationCount: number;
 };
 
 const AuthContext = createContext<AuthContextValue>({
@@ -31,13 +33,12 @@ const AuthContext = createContext<AuthContextValue>({
   refresh: async () => {},
   clearAuth: () => {},
   unreadMessageCount: 0,
+  unreadNotificationCount: 0,
 });
 
-// ─── unread-count helpers (no hook — runs inside AuthProvider) ────────────────
+// ─── unread-message-count helpers ─────────────────────────────────────────────
 
-async function fetchUnreadCount(
-  profileId: string
-): Promise<number> {
+async function fetchUnreadCount(profileId: string): Promise<number> {
   if (!isSupabaseConfigured()) return 0;
   const supabase = createClient();
 
@@ -76,12 +77,29 @@ async function fetchUnreadCount(
   return count;
 }
 
+// ─── unread-notification-count helper ─────────────────────────────────────────
+
+async function fetchUnreadNotificationCount(profileId: string): Promise<number> {
+  if (!isSupabaseConfigured()) return 0;
+  const supabase = createClient();
+
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profileId)
+    .eq("is_read", false);
+
+  if (error) return 0;
+  return count ?? 0;
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const refreshingRef = useRef(false);
@@ -90,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
     setIsLoading(false);
     setUnreadMessageCount(0);
+    setUnreadNotificationCount(0);
   }, []);
 
   const refresh = useCallback(async (force = false) => {
@@ -144,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(null);
         setIsLoading(false);
         setUnreadMessageCount(0);
+        setUnreadNotificationCount(0);
         router.refresh();
       } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
         refresh(true).then(() => {
@@ -190,20 +210,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [profile?.id]);
 
   // ── Unread message count — ONE channel for the entire app ──
-  //
-  // Root cause of the Phase C crash:
-  //   Both <Navbar> and <MobileNav> called useUnreadMessages(profileId),
-  //   each trying to create channel("unread-messages:<id>"). Supabase's
-  //   client-side channel registry returns the SAME cached object on the
-  //   second call (already subscribed), so the second .on() threw:
-  //   "cannot add postgres_changes callbacks after subscribe()".
-  //
-  // Fix: own the single channel here in AuthProvider. Any number of
-  // components can read `unreadMessageCount` from context with zero risk
-  // of duplicate channels.
-  //
-  // The stable-ref pattern is still used so the realtime effect only
-  // depends on [profile?.id] and never re-subscribes on re-renders.
   const doFetchUnread = useCallback(async () => {
     if (!profile?.id) { setUnreadMessageCount(0); return; }
     const count = await fetchUnreadCount(profile.id);
@@ -215,19 +221,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     doFetchUnreadRef.current = doFetchUnread;
   }, [doFetchUnread]);
 
-  // Initial fetch whenever profile changes
   useEffect(() => {
     doFetchUnread();
   }, [doFetchUnread]);
 
-  // Clear badge when navigating to /messages
+  // Clear message badge when navigating to /messages
   useEffect(() => {
     if (pathname?.startsWith("/messages")) {
       setUnreadMessageCount(0);
     }
   }, [pathname]);
 
-  // Single realtime channel — all .on() before .subscribe()
+  // Single realtime channel for messages
   useEffect(() => {
     if (!profile?.id || !isSupabaseConfigured()) return;
 
@@ -272,7 +277,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]); // stable — never depends on doFetchUnread directly
+  }, [profile?.id]);
+
+  // ── Unread notification count — realtime ──────────────────
+  const doFetchUnreadNotifs = useCallback(async () => {
+    if (!profile?.id) { setUnreadNotificationCount(0); return; }
+    const count = await fetchUnreadNotificationCount(profile.id);
+    setUnreadNotificationCount(count);
+  }, [profile?.id]);
+
+  const doFetchUnreadNotifsRef = useRef(doFetchUnreadNotifs);
+  useEffect(() => {
+    doFetchUnreadNotifsRef.current = doFetchUnreadNotifs;
+  }, [doFetchUnreadNotifs]);
+
+  useEffect(() => {
+    doFetchUnreadNotifs();
+  }, [doFetchUnreadNotifs]);
+
+  useEffect(() => {
+    if (!profile?.id || !isSupabaseConfigured()) return;
+
+    const profileId = profile.id;
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`unread-notifs:${profileId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${profileId}`,
+        },
+        () => {
+          doFetchUnreadNotifsRef.current();
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === "CHANNEL_ERROR") {
+          console.warn("[AuthProvider] notif count channel error:", err);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
 
   // ── Safety net ─────────────────────────────────────────────
   useEffect(() => {
@@ -282,8 +335,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isLoading]);
 
   const value = useMemo(
-    () => ({ profile, isLoading, refresh, clearAuth, unreadMessageCount }),
-    [profile, isLoading, refresh, clearAuth, unreadMessageCount]
+    () => ({ profile, isLoading, refresh, clearAuth, unreadMessageCount, unreadNotificationCount }),
+    [profile, isLoading, refresh, clearAuth, unreadMessageCount, unreadNotificationCount]
   );
 
   return (

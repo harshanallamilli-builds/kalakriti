@@ -8,7 +8,6 @@ import type { ActionState } from "@/lib/types";
 
 // Helper — fire-and-forget notification insert using service-role client.
 // Bypasses RLS so server actions can write notifications for ANY user.
-// Logs errors so silent failures become visible in server logs.
 async function createNotification(
   userId: string,
   type: string,
@@ -148,16 +147,29 @@ export async function sendMessage(
   // Mark own message as read immediately
   await markConversationRead(conversationId);
 
-  // Notify the other party
-  const { data: conv } = await supabase
-    .from("conversations")
-    .select("user_id, creator_id")
-    .eq("id", conversationId)
-    .single();
+  // Fetch the conversation + sender name to build a rich notification
+  const [convResult, senderResult] = await Promise.all([
+    supabase
+      .from("conversations")
+      .select("user_id, creator_id")
+      .eq("id", conversationId)
+      .single(),
+    supabase
+      .from("profiles")
+      .select("full_name, store_name")
+      .eq("id", user.id)
+      .single(),
+  ]);
+
+  const conv = convResult.data;
+  const sender = senderResult.data;
 
   if (conv) {
     const recipientId = conv.user_id === user.id ? conv.creator_id : conv.user_id;
     if (recipientId) {
+      const senderName =
+        sender?.store_name || sender?.full_name || "Someone";
+
       const snippet = imageUrl
         ? body
           ? `📷 ${body.length > 60 ? body.slice(0, 60) + "…" : body}`
@@ -169,7 +181,7 @@ export async function sendMessage(
       await createNotification(
         recipientId,
         "new_message",
-        "New message",
+        `New message from ${senderName}`,
         snippet,
         `/messages/${conversationId}`
       );

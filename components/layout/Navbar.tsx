@@ -15,10 +15,11 @@ const publicLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { profile, isLoading, unreadMessageCount } = useAuth();
+  const { profile, isLoading, unreadMessageCount, unreadNotificationCount } = useAuth();
   const [open, setOpen] = useState(false);
   const unreadCount = unreadMessageCount;
   const hasUnread = unreadCount > 0;
+  const hasUnreadNotifs = unreadNotificationCount > 0;
 
   const dashboardHref = profile?.role === "creator" ? "/dashboard/creator" : "/dashboard/user";
   const dashboardLabel = profile?.role === "creator" ? "Studio" : "My Account";
@@ -88,7 +89,12 @@ export function Navbar() {
           <div className="hidden items-center gap-3 md:flex">
             {!isLoading && profile ? (
               <>
-                <NotificationBell userId={profile.id} />
+                {/* Notification bell — badge count comes from AuthProvider via NotificationBell's own hook */}
+                <div className="relative">
+                  <NotificationBell userId={profile.id} />
+                  {/* Extra dot on bell when there are unread notifications and bell is not open */}
+                  {/* Note: NotificationBell manages its own badge via useNotifications — this is handled internally */}
+                </div>
                 <Button href={dashboardHref} size="sm">{dashboardLabel}</Button>
               </>
             ) : !isLoading ? (
@@ -105,7 +111,7 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Mobile hamburger — shows both message + notification dots */}
           <button
             type="button"
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-linen md:hidden"
@@ -120,7 +126,8 @@ export function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
-            {hasUnread && !onMessagesPage && profile && (
+            {/* Dot indicator for unread messages OR notifications */}
+            {((hasUnread && !onMessagesPage) || hasUnreadNotifs) && profile && (
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-terracotta" />
             )}
           </button>
@@ -145,23 +152,40 @@ export function Navbar() {
                 </li>
               ))}
               {profile && (
-                <li>
-                  <Link
-                    href="/messages"
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl px-3 py-3.5 font-heading text-lg transition-colors",
-                      isActive("/messages") ? "text-terracotta" : "text-charcoal hover:bg-sand/50"
-                    )}
-                  >
-                    Messages
-                    {hasUnread && !onMessagesPage && (
-                      <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-xs font-bold text-cream">
-                        {unreadCount > 9 ? "9+" : unreadCount}
+                <>
+                  <li>
+                    <Link
+                      href="/messages"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-xl px-3 py-3.5 font-heading text-lg transition-colors",
+                        isActive("/messages") ? "text-terracotta" : "text-charcoal hover:bg-sand/50"
+                      )}
+                    >
+                      Messages
+                      {hasUnread && !onMessagesPage && (
+                        <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-xs font-bold text-cream">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                  {/* Notifications link in mobile menu */}
+                  <li>
+                    <div className="flex items-center gap-2 rounded-xl px-3 py-3.5 font-heading text-lg text-charcoal">
+                      <span>Notifications</span>
+                      {hasUnreadNotifs && (
+                        <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta px-1 text-xs font-bold text-cream">
+                          {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                        </span>
+                      )}
+                      {/* Render the bell inline in mobile menu */}
+                      <span className="ml-auto">
+                        <NotificationBell userId={profile.id} />
                       </span>
-                    )}
-                  </Link>
-                </li>
+                    </div>
+                  </li>
+                </>
               )}
             </ul>
             <div className="mt-4 flex flex-col gap-2 border-t border-linen pt-4">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { cn } from "@/lib/utils";
 
 function HomeIcon({ active }: { active: boolean }) {
@@ -105,6 +106,20 @@ export function MobileNav() {
             <MessageIcon active={isActive("/messages")} badge={hasUnread && !onMessagesPage} count={unreadCount} />
             Messages
           </Link>
+        )}
+
+        {/* Notification Bell — only when logged in */}
+        {!isLoading && profile && (
+          <div className={cn(
+            "flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
+            "text-warm-gray"
+          )}>
+            {/* The bell renders its own popup — on mobile it pops upward */}
+            <div className="relative flex flex-col items-center gap-0.5">
+              <NotificationBell userId={profile.id} />
+            </div>
+            <span className="mt-0.5">Alerts</span>
+          </div>
         )}
 
         {/* Dashboard / Sign in */}

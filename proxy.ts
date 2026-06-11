@@ -9,13 +9,13 @@ const CREATOR_ONLY = ["/dashboard/creator"];
 // Routes only users can access  
 const USER_ONLY = ["/dashboard/user"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Always update session (refreshes auth cookies)
   const sessionResponse = await updateSession(request);
 
-  // Skip middleware for public routes and auth callback
+  // Skip proxy for public routes and auth callback
   const isPublicRoute =
     pathname === "/" ||
     pathname.startsWith("/marketplace") ||
