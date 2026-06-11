@@ -302,7 +302,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
 
     const channel = supabase
-      .channel(`unread-notifs:${profileId}`)
+      .channel(`notifs:${profileId}`)
       .on(
         "postgres_changes",
         {
@@ -313,11 +313,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         () => {
           doFetchUnreadNotifsRef.current();
+          window.dispatchEvent(new CustomEvent("kk:notifications-changed"));
         }
       )
       .subscribe((status, err) => {
         if (status === "CHANNEL_ERROR") {
-          console.warn("[AuthProvider] notif count channel error:", err);
+          console.warn("[AuthProvider] notif channel error:", err);
         }
       });
 
