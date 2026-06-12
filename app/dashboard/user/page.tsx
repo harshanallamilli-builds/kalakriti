@@ -14,7 +14,10 @@ export default async function UserDashboardPage() {
   if (!profile) redirect("/auth/login?role=user");
   if (profile.role !== "user") redirect("/dashboard/creator");
 
-  const orders = await getUserOrders(profile.id);
+  // Fetch orders concurrently now that we have the profile id
+  const [orders] = await Promise.all([
+    getUserOrders(profile.id),
+  ]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 md:py-14">

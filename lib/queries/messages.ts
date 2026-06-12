@@ -29,12 +29,28 @@ export async function getUserConversations(
 
   const convIds = conversations.map((c) => c.id);
 
-  // Batch fetch last message per conversation
-  const { data: allMsgs } = await supabase
-    .from("messages")
-    .select("conversation_id, body, image_url, created_at")
-    .in("conversation_id", convIds)
-    .order("created_at", { ascending: false });
+  // Fetch all three data sets in parallel instead of sequentially
+  const [allMsgsResult, readRowsResult, unreadMsgsResult] = await Promise.all([
+    supabase
+      .from("messages")
+      .select("conversation_id, body, image_url, created_at")
+      .in("conversation_id", convIds)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("conversation_reads")
+      .select("conversation_id, last_read_at")
+      .eq("user_id", userId)
+      .in("conversation_id", convIds),
+    supabase
+      .from("messages")
+      .select("conversation_id, sender_id, created_at")
+      .in("conversation_id", convIds)
+      .neq("sender_id", userId),
+  ]);
+
+  const allMsgs = allMsgsResult.data;
+  const readRows = readRowsResult.data;
+  const unreadMsgs = unreadMsgsResult.data;
 
   const lastMsgByConv: Record<
     string,
@@ -50,24 +66,10 @@ export async function getUserConversations(
     }
   }
 
-  // Fetch read state for this user
-  const { data: readRows } = await supabase
-    .from("conversation_reads")
-    .select("conversation_id, last_read_at")
-    .eq("user_id", userId)
-    .in("conversation_id", convIds);
-
   const readByConv: Record<string, string> = {};
   for (const r of readRows ?? []) {
     readByConv[r.conversation_id] = r.last_read_at;
   }
-
-  // Count unread messages per conversation (messages from others after last_read_at)
-  const { data: unreadMsgs } = await supabase
-    .from("messages")
-    .select("conversation_id, sender_id, created_at")
-    .in("conversation_id", convIds)
-    .neq("sender_id", userId);
 
   const realUnreadCounts: Record<string, number> = {};
   for (const msg of unreadMsgs ?? []) {

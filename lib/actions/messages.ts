@@ -204,12 +204,14 @@ export async function markConversationRead(
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Upsert conversation_reads
+  // Upsert conversation_reads — use now + 5 s so the timestamp always beats
+  // the Postgres-assigned message created_at (JS clock can lag the DB clock).
+  const future = new Date(Date.now() + 5000).toISOString();
   await supabase.from("conversation_reads").upsert(
     {
       conversation_id: conversationId,
       user_id: user.id,
-      last_read_at: new Date().toISOString(),
+      last_read_at: future,
     },
     { onConflict: "conversation_id,user_id" }
   );
@@ -217,7 +219,7 @@ export async function markConversationRead(
   // Also mark unread messages (from other party) as read
   await supabase
     .from("messages")
-    .update({ read_at: new Date().toISOString() })
+    .update({ read_at: future })
     .eq("conversation_id", conversationId)
     .neq("sender_id", user.id)
     .is("read_at", null);

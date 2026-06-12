@@ -5,16 +5,15 @@ import { getUserConversations } from "@/lib/queries/messages";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Messages" };
+// Always fetch fresh data — never serve a cached version of this page.
+// Without this, navigating back from a conversation shows stale unread counts.
+export const dynamic = "force-dynamic";
 
 export default async function MessagesPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/auth/login");
 
   const conversations = await getUserConversations(profile.id);
-  const totalUnread = conversations.reduce(
-    (n, c) => n + (c.unread_count ?? 0),
-    0
-  );
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 md:py-12">

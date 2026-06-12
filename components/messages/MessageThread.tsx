@@ -9,6 +9,7 @@ import {
 } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/config";
+import { markConversationRead } from "@/lib/actions/messages";
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -245,24 +246,35 @@ export function MessageThread({
     prevLengthRef.current = messages.length;
   }, [messages.length, atBottom, scrollToBottom]);
 
-  // ─── Mark read on open ──────────────────────────────────────────────────────
+  // ─── Mark read on open & when new messages arrive ───────────────────────────
 
+  const markReadNow = useCallback(async () => {
+    // Call the server action — this guarantees the DB write completes
+    // before Next.js serves the /messages page on back-navigation.
+    await markConversationRead(conversationId);
+    // Optimistically clear the unread dot in ConversationList
+    window.dispatchEvent(
+      new CustomEvent("kk:messages-read", { detail: { conversationId } })
+    );
+  }, [conversationId]);
+
+  // Run on mount (opening the chat)
   useEffect(() => {
-    if (!isSupabaseConfigured()) return;
-    const now = new Date().toISOString();
-    void supabase
-      .from("conversation_reads")
-      .upsert(
-        { conversation_id: conversationId, user_id: currentUserId, last_read_at: now },
-        { onConflict: "conversation_id,user_id" }
+    void markReadNow();
+    // Signal to ConversationList that this conversation is no longer active on unmount
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("kk:messages-left", { detail: { conversationId } })
       );
-    void supabase
-      .from("messages")
-      .update({ read_at: now })
-      .eq("conversation_id", conversationId)
-      .neq("sender_id", currentUserId)
-      .is("read_at", null);
-  }, [conversationId, currentUserId, supabase]);
+    };
+  }, [markReadNow, conversationId]);
+
+  // Also re-run whenever new messages arrive while this chat is open,
+  // so incoming messages from the other party are immediately marked read.
+  const messageCount = messages.length;
+  useEffect(() => {
+    if (messageCount > 0) void markReadNow();
+  }, [messageCount, markReadNow]);
 
   // ─── Scroll tracking ─────────────────────────────────────────────────────────
 
@@ -294,11 +306,13 @@ export function MessageThread({
           const newMsg = payload.new as Message;
           setMessages((prev) => {
             if (prev.some((m) => m.id === newMsg.id)) return prev;
+            // Match optimistic message: same sender + body, created within 30s of the real message
             const optIdx = prev.findIndex(
               (m) =>
                 m.optimistic &&
                 m.sender_id === newMsg.sender_id &&
-                m.body === newMsg.body
+                m.body === newMsg.body &&
+                Math.abs(new Date(m.created_at).getTime() - new Date(newMsg.created_at).getTime()) < 30000
             );
             if (optIdx !== -1) {
               const next = [...prev];
@@ -482,6 +496,12 @@ export function MessageThread({
               setImagePreview(capturedPreview);
             }
           } else {
+            // Insert succeeded — clear "Sending…" immediately without waiting for realtime
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === tempId ? { ...m, optimistic: false } : m
+              )
+            );
             void supabase
               .from("conversations")
               .update({ updated_at: new Date().toISOString() })

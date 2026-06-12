@@ -232,6 +232,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
+  // Clear message badge instantly when user opens a conversation (fires before realtime)
+  useEffect(() => {
+    function onMessagesRead() {
+      doFetchUnreadRef.current();
+    }
+    window.addEventListener("kk:messages-read", onMessagesRead);
+    return () => window.removeEventListener("kk:messages-read", onMessagesRead);
+  }, []);
+
   // Single realtime channel for messages
   useEffect(() => {
     if (!profile?.id || !isSupabaseConfigured()) return;
@@ -294,6 +303,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     doFetchUnreadNotifs();
   }, [doFetchUnreadNotifs]);
+
+  // When a notification is marked read optimistically (from NotificationBell),
+  // sync the navbar badge immediately without waiting for the realtime DB event.
+  useEffect(() => {
+    function onNotifsChanged() {
+      doFetchUnreadNotifsRef.current();
+    }
+    window.addEventListener("kk:notifications-changed", onNotifsChanged);
+    return () => window.removeEventListener("kk:notifications-changed", onNotifsChanged);
+  }, []);
 
   useEffect(() => {
     if (!profile?.id || !isSupabaseConfigured()) return;
