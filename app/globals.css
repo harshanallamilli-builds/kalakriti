@@ -180,3 +180,75 @@ html.chat-page body {
   overflow: hidden !important;
   height: 100% !important;
 }
+/* ── Stagger animation delays ───────────────────────────────── */
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+
+/* ── Home page horizontal scroll hide scrollbar ──────────────── */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Scroll reveal utility ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+
+/* ── Floating mosaic animation (mobile hero background) ─────── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-10px) rotate(1.5deg); }
+  66%       { transform: translateY(5px) rotate(-1deg); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-14px) rotate(-2deg); }
+}
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px); }
+  40%       { transform: translateY(-8px); }
+  70%       { transform: translateY(4px); }
+}
+.animate-float-slow   { animation: float-slow   7s ease-in-out infinite; }
+.animate-float-medium { animation: float-medium 5.5s ease-in-out infinite; }
+.animate-float-fast   { animation: float-fast   4s ease-in-out infinite; }
+
+/* ── Spin slow (ambient) ──────────────────────────────────── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 18s linear infinite; }
+
+/* ── Hide scrollbar ──────────────────────────────────────── */
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── duration-600 ───────────────────────────────────────── */
+.duration-600 { transition-duration: 600ms; }
+
+/* ── Craft ticker infinite scroll ───────────────────────── */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker 35s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
