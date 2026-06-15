@@ -292,7 +292,7 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 transition-all duration-500",
+          "cp-global-nav sticky top-0 z-50 transition-all duration-500",
           scrolled
             ? "bg-cream/90 backdrop-blur-xl shadow-[0_1px_0_0_rgba(229,217,200,0.8),0_8px_32px_-8px_rgba(58,50,44,0.10)]"
             : "bg-cream/70 backdrop-blur-md"

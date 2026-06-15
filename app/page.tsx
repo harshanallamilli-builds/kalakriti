@@ -189,11 +189,58 @@
 //   );
 // }
 
+// import { Hero } from "@/components/home/Hero";
+// import { CraftTicker } from "@/components/home/CraftTicker";
+// import { HomeCategories } from "@/components/home/HomeCategories";
+// import { HomeProducts } from "@/components/home/HomeProducts";
+// import { StatsStrip } from "@/components/home/StatsStrip";
+// import { ArtisanMagazine } from "@/components/home/ArtisanMagazine";
+// import { HomeArtisans } from "@/components/home/HomeArtisans";
+// import { HomeCTA } from "@/components/home/HomeCTA";
+// import { isSupabaseConfigured } from "@/lib/config";
+// import { getCurrentProfile } from "@/lib/queries/profiles";
+// import { getProducts } from "@/lib/queries/products";
+// import { getCreators } from "@/lib/queries/profiles";
+// import { getFeaturedStories } from "@/lib/queries/artisanStories";
+// import { getHomeStats } from "@/lib/queries/homeStats";
+
+// export const dynamic = "force-dynamic";
+
+// export default async function HomePage() {
+//   const configured = isSupabaseConfigured();
+//   const profile = configured ? await getCurrentProfile() : null;
+//   const isLoggedIn = !!profile;
+
+//   const [products, creators, stories, stats] = configured
+//     ? await Promise.all([
+//         getProducts({ limit: isLoggedIn ? 8 : 4 }),
+//         getCreators(isLoggedIn ? 6 : 3),
+//         getFeaturedStories(4),
+//         getHomeStats(),
+//       ])
+//     : [[], [], [], { artisanCount: 0, stateCount: 0, productCount: 0 }];
+
+//   return (
+//     <>
+//       <Hero profile={profile} />
+//       <CraftTicker />
+//       <HomeCategories />
+//       <HomeProducts products={products} isLoggedIn={isLoggedIn} />
+//       <StatsStrip stats={stats} />
+//       <ArtisanMagazine stories={stories} />
+//       <HomeArtisans creators={creators} isLoggedIn={isLoggedIn} />
+//       {!isLoggedIn && <HomeCTA />}
+//     </>
+//   );
+// }
+
+
 import { Hero } from "@/components/home/Hero";
 import { CraftTicker } from "@/components/home/CraftTicker";
 import { HomeCategories } from "@/components/home/HomeCategories";
 import { HomeProducts } from "@/components/home/HomeProducts";
 import { StatsStrip } from "@/components/home/StatsStrip";
+import { CraftShowcase } from "@/components/home/CraftShowcase";
 import { ArtisanMagazine } from "@/components/home/ArtisanMagazine";
 import { HomeArtisans } from "@/components/home/HomeArtisans";
 import { HomeCTA } from "@/components/home/HomeCTA";
@@ -224,6 +271,8 @@ export default async function HomePage() {
     <>
       <Hero profile={profile} />
       <CraftTicker />
+            <CraftShowcase />
+
       <HomeCategories />
       <HomeProducts products={products} isLoggedIn={isLoggedIn} />
       <StatsStrip stats={stats} />
