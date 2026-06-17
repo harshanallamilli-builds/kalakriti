@@ -181,7 +181,7 @@ import { Toaster } from "@/components/ui/Toaster";
 import { LenisProvider } from "@/components/layout/LenisProvider";
 import { MainWrapper } from "@/components/layout/MainWrapper";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: {
