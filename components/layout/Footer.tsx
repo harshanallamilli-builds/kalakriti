@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const footerLinks = {
   Explore: [
@@ -19,9 +20,8 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-saffron/90 to-terracotta font-heading text-xl font-semibold text-cream">
-                K
-              </span>
+             <Image src="/logo.png" alt="Kalakriti" width={36} height={36} />
+
               <span className="font-heading text-2xl text-charcoal">Kalakriti</span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-warm-gray">

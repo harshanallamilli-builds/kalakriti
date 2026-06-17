@@ -111,7 +111,6 @@
 //   );
 // }
 
-
 "use client";
 
 import { useActionState, useState, useEffect } from "react";
@@ -187,7 +186,7 @@ export function LoginForm() {
       {/* Error */}
       {displayError && (
         <div className="auth-error">
-          <svg className="auth-error__icon" fill="none" viewBox="0 0 20 20">
+          <svg width="16" height="16" fill="none" viewBox="0 0 20 20" className="auth-error__icon">
             <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
             <path d="M10 6v4M10 13.5h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
@@ -209,11 +208,15 @@ export function LoginForm() {
       <form action={formAction} onSubmit={handleSubmit} className="auth-fields">
         <input type="hidden" name="redirect" value={redirect} />
 
-        {/* Email */}
+        {/* Email field */}
         <div className={cn("auth-field", focused === "email" && "auth-field--focused", vals.email && "auth-field--filled")}>
           <label className="auth-field__label" htmlFor="login-email">Email</label>
           <div className="auth-field__wrap">
-            <svg className="auth-field__icon" fill="none" viewBox="0 0 20 20">
+            <svg
+              width="16" height="16"
+              fill="none" viewBox="0 0 20 20"
+              style={{ position: "absolute", left: 12, color: "var(--warm-gray)", pointerEvents: "none", flexShrink: 0 }}
+            >
               <path d="M2 5l8 6 8-6M2 5h16v10H2V5z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <input
@@ -232,11 +235,15 @@ export function LoginForm() {
           </div>
         </div>
 
-        {/* Password */}
+        {/* Password field */}
         <div className={cn("auth-field", focused === "password" && "auth-field--focused", vals.password && "auth-field--filled")}>
           <label className="auth-field__label" htmlFor="login-password">Password</label>
           <div className="auth-field__wrap">
-            <svg className="auth-field__icon" fill="none" viewBox="0 0 20 20">
+            <svg
+              width="16" height="16"
+              fill="none" viewBox="0 0 20 20"
+              style={{ position: "absolute", left: 12, color: "var(--warm-gray)", pointerEvents: "none", flexShrink: 0 }}
+            >
               <rect x="3" y="9" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M7 9V6a3 3 0 016 0v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
               <circle cx="10" cy="14" r="1.2" fill="currentColor"/>
@@ -261,13 +268,13 @@ export function LoginForm() {
               aria-label={showPass ? "Hide password" : "Show password"}
             >
               {showPass ? (
-                <svg fill="none" viewBox="0 0 20 20" width="16" height="16">
+                <svg width="16" height="16" fill="none" viewBox="0 0 20 20">
                   <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.4"/>
                   <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
                   <path d="M3 3l14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                 </svg>
               ) : (
-                <svg fill="none" viewBox="0 0 20 20" width="16" height="16">
+                <svg width="16" height="16" fill="none" viewBox="0 0 20 20">
                   <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.4"/>
                   <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
                 </svg>
@@ -290,7 +297,7 @@ export function LoginForm() {
           ) : (
             <>
               Sign in
-              <svg fill="none" viewBox="0 0 20 20" width="16" height="16">
+              <svg width="16" height="16" fill="none" viewBox="0 0 20 20">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </>
@@ -298,7 +305,7 @@ export function LoginForm() {
         </button>
       </form>
 
-      {/* Footer link */}
+      {/* Footer */}
       <p className="auth-footer-link">
         New here?{" "}
         <Link href={`/auth/signup?role=${role}`} className="auth-footer-link__cta">

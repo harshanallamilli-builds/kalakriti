@@ -181,6 +181,8 @@ import { Toaster } from "@/components/ui/Toaster";
 import { LenisProvider } from "@/components/layout/LenisProvider";
 import { MainWrapper } from "@/components/layout/MainWrapper";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
+
 
 export const metadata: Metadata = {
   title: {
@@ -203,6 +205,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="icon" href="/logo.png" type="image/png" sizes="32x32" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap"
@@ -220,6 +223,7 @@ export default function RootLayout({
           <LenisProvider>
             <Navbar />
             <MainWrapper>{children}</MainWrapper>
+            <Analytics />
             <Footer />
             <MobileNav />
             <Toaster />

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+
 
 export function CreatorHeroLogo() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,7 +19,7 @@ export function CreatorHeroLogo() {
   return (
     <Link href="/" className={`cp-logo ${scrolled ? "cp-logo--scrolled" : ""}`} aria-label="Kalakriti home">
       <span className="cp-logo__badge">
-        <span className="cp-logo__letter">K</span>
+        <Image src="/logo.png" alt="Kalakriti" width={32} height={32} className="rounded-full object-contain" />
       </span>
       <span className="cp-logo__wordmark">Kalakriti</span>
     </Link>

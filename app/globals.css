@@ -865,14 +865,13 @@ html.chat-page body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* default size: slightly larger in hero center */
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d4920a, #c49a6c, #b85c38);
+  background: #faf6f0;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.25),
-    0 3px 12px rgba(184,92,56,0.40);
+    inset 0 1px 0 rgba(255,255,255,0.60),
+    0 3px 12px rgba(184,92,56,0.20);
   transition: width 0.45s cubic-bezier(0.4,0,0.2,1),
               height 0.45s cubic-bezier(0.4,0,0.2,1),
               box-shadow 0.3s;
@@ -3300,11 +3299,24 @@ body:has(.creator-portfolio-root) .cp-global-nav {
 .auth-field__icon {
   position: absolute;
   left: 12px;
+  width: 16px;
+  height: 16px;
   color: var(--warm-gray);
   pointer-events: none;
   transition: color 0.2s;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Ensure any SVG inside auth-field__icon is always constrained */
+.auth-field__icon svg,
+.auth-field__icon > svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px;
+  min-height: 16px;
 }
 
 .auth-field--focused .auth-field__icon { color: var(--terracotta); }
@@ -3540,4 +3552,16 @@ body:has(.creator-portfolio-root) .cp-global-nav {
 .auth-tagline__mark {
   color: var(--saffron);
   font-size: 0.65rem;
+}
+
+/* ── Lenis + backdrop-filter scroll freeze fix ──────────────────────────────
+   backdrop-blur on the sticky Navbar creates a GPU compositing layer that
+   Lenis scroll momentum collides with near the bottom of every page,
+   causing a 1-2s freeze before scroll direction can reverse.
+   translateZ(0) on the header keeps it on its own layer correctly
+   so Lenis scroll events pass through without blocking.
+   ─────────────────────────────────────────────────────────────────────────── */
+.cp-global-nav {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }

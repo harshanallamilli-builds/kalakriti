@@ -133,7 +133,7 @@ export default function FounderPage() {
         <div className={`fp-hero__inner ${heroIn ? "fp-hero__inner--in" : ""}`}>
 
           {/* eyebrow */}
-          <p className="fp-eyebrow">Meet the Founder</p>
+          <p className="fp-eyebrow">Meet the Creator</p>
 
           {/* Opening question — the heart of the story */}
           <h1 className="fp-hero__heading">
@@ -302,7 +302,7 @@ export default function FounderPage() {
           <Reveal delay={280}>
             <div className="fp-signature">
               <span className="fp-signature__name">— Harsha</span>
-              <span className="fp-signature__title">Founder, Kalakriti</span>
+              <span className="fp-signature__title">Creator, Kalakriti</span>
             </div>
           </Reveal>
         </section>

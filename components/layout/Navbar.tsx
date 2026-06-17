@@ -819,6 +819,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { FeedbackModal } from "@/components/ui/FeedbackModal";
+import Image from "next/image";
+
 
 const publicLinks = [
   { href: "/marketplace", label: "Marketplace" },
@@ -897,11 +899,14 @@ export function Navbar() {
             onClick={() => setOpen(false)}
           >
             <span className="relative flex h-9 w-9 items-center justify-center">
-              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-saffron/30 to-terracotta/20 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
+              {/* <span className="absolute inset-0 rounded-full bg-gradient-to-br from-saffron/30 to-terracotta/20 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
               <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-saffron via-clay to-terracotta shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_8px_rgba(184,92,56,0.30)] transition-all duration-300 group-hover:shadow-[0_4px_16px_rgba(184,92,56,0.40)] group-hover:scale-105">
-                <span className="font-heading text-xl font-semibold text-cream" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.20)" }}>
-                  K
-                </span>
+                <Image src="/logo.png" alt="Kalakriti" width={40} height={40} className="rounded-full" />
+              </span>
+            </span> */}
+              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-saffron/30 to-terracotta/20 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_8px_rgba(184,92,56,0.20)] transition-all duration-300 group-hover:shadow-[0_4px_16px_rgba(184,92,56,0.30)] group-hover:scale-105">
+                <Image src="/logo.png" alt="Kalakriti" width={32} height={32} className="rounded-full object-contain" />
               </span>
             </span>
             <span className="font-heading text-[1.45rem] font-medium tracking-tight text-charcoal transition-colors duration-200 group-hover:text-espresso">
