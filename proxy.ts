@@ -105,7 +105,6 @@
 //   ],
 // };
 
-
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { createServerClient } from "@supabase/ssr";
@@ -120,15 +119,11 @@ const USER_ONLY = ["/dashboard/user"];
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Admin API: verify x-admin-secret header ──────────────────────────────
-  // The /api/admin route itself validates the secret; here we just block
-  // requests that have no secret header at all to avoid noise in logs.
+  // ── /api/admin: let it pass through to the route handler ─────────────────
+  // The route handler itself validates x-admin-secret on every request.
+  // Middleware must NOT block it — that causes a 404/403 before Next.js routing.
+  // OPTIONS preflight must also be allowed through (no secret header on preflights).
   if (pathname.startsWith("/api/admin")) {
-    const secret = request.headers.get("x-admin-secret");
-    const expected = process.env.ADMIN_SECRET;
-    if (!expected || secret !== expected) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
     return NextResponse.next();
   }
 

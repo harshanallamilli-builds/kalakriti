@@ -3,7 +3,19 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-// ─── Admin secret check ───────────────────────────────────────────────────────
+// ─── CORS headers — allow the admin HTML file from any origin ─────────────────
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, x-admin-secret",
+};
+
+// Preflight handler (browser sends OPTIONS before every cross-origin request)
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
+// ─── Admin helpers ────────────────────────────────────────────────────────────
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,16 +32,16 @@ function checkAdminSecret(req: NextRequest): boolean {
   return secret === expected;
 }
 
-// ─── GET — read data ──────────────────────────────────────────────────────────
+function json(data: unknown, status = 200) {
+  return NextResponse.json(data, { status, headers: CORS });
+}
+
+// ─── GET ──────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  if (!checkAdminSecret(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!checkAdminSecret(req)) return json({ error: "Unauthorized" }, 401);
 
   const db = getAdminClient();
-  if (!db) {
-    return NextResponse.json({ error: "Admin client unavailable" }, { status: 500 });
-  }
+  if (!db) return json({ error: "Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY env var" }, 500);
 
   const { searchParams } = req.nextUrl;
   const resource = searchParams.get("resource");
@@ -45,7 +57,7 @@ export async function GET(req: NextRequest) {
           db.from("conversations").select("id", { count: "exact", head: true }),
           db.from("feedback").select("id", { count: "exact", head: true }),
         ]);
-        return NextResponse.json({
+        return json({
           users: users.count ?? 0,
           creators: creators.count ?? 0,
           products: products.count ?? 0,
@@ -67,7 +79,7 @@ export async function GET(req: NextRequest) {
         if (role) q = q.eq("role", role);
         const { data, error } = await q;
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "products": {
@@ -79,7 +91,7 @@ export async function GET(req: NextRequest) {
           .order("created_at", { ascending: false })
           .range(page * pageSize, page * pageSize + pageSize - 1);
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "orders": {
@@ -99,7 +111,7 @@ export async function GET(req: NextRequest) {
         if (status) q = q.eq("status", status);
         const { data, error } = await q;
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "conversations": {
@@ -116,19 +128,19 @@ export async function GET(req: NextRequest) {
           .order("updated_at", { ascending: false })
           .range(page * pageSize, page * pageSize + pageSize - 1);
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "messages": {
         const conversationId = searchParams.get("conversationId");
-        if (!conversationId) return NextResponse.json({ error: "conversationId required" }, { status: 400 });
+        if (!conversationId) return json({ error: "conversationId required" }, 400);
         const { data, error } = await db
           .from("messages")
           .select("*, sender:profiles(id, full_name, avatar_url, role)")
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true });
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "feedback": {
@@ -140,18 +152,26 @@ export async function GET(req: NextRequest) {
           .order("created_at", { ascending: false })
           .range(page * pageSize, page * pageSize + pageSize - 1);
         if (error) throw error;
-        return NextResponse.json(data);
+        return json(data);
       }
 
       case "user_detail": {
         const userId = searchParams.get("userId");
-        if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
+        if (!userId) return json({ error: "userId required" }, 400);
         const [profile, orders, products] = await Promise.all([
           db.from("profiles").select("*").eq("id", userId).single(),
-          db.from("orders").select("*, product:products(id, name, image_url, price_inr)").or(`user_id.eq.${userId},creator_id.eq.${userId}`).order("created_at", { ascending: false }).limit(20),
-          db.from("products").select("*").eq("creator_id", userId).order("created_at", { ascending: false }).limit(20),
+          db.from("orders")
+            .select("*, product:products(id, name, image_url, price_inr)")
+            .or(`user_id.eq.${userId},creator_id.eq.${userId}`)
+            .order("created_at", { ascending: false })
+            .limit(20),
+          db.from("products")
+            .select("*")
+            .eq("creator_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(20),
         ]);
-        return NextResponse.json({
+        return json({
           profile: profile.data,
           orders: orders.data ?? [],
           products: products.data ?? [],
@@ -159,117 +179,93 @@ export async function GET(req: NextRequest) {
       }
 
       default:
-        return NextResponse.json({ error: "Unknown resource" }, { status: 400 });
+        return json({ error: "Unknown resource" }, 400);
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return json({ error: message }, 500);
   }
 }
 
-// ─── POST — write / mutate data ───────────────────────────────────────────────
+// ─── POST ─────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  if (!checkAdminSecret(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!checkAdminSecret(req)) return json({ error: "Unauthorized" }, 401);
 
   const db = getAdminClient();
-  if (!db) {
-    return NextResponse.json({ error: "Admin client unavailable" }, { status: 500 });
-  }
+  if (!db) return json({ error: "Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY env var" }, 500);
 
   const body = await req.json();
   const { action } = body;
 
   try {
     switch (action) {
-      // ── Delete ────────────────────────────────────────────────────────────
       case "delete_user": {
-        // Delete from auth + cascade deletes profile and all related data
         const { error } = await db.auth.admin.deleteUser(body.userId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       case "delete_product": {
         const { error } = await db.from("products").delete().eq("id", body.productId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       case "delete_order": {
         const { error } = await db.from("orders").delete().eq("id", body.orderId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       case "delete_message": {
         const { error } = await db.from("messages").delete().eq("id", body.messageId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       case "delete_conversation": {
         const { error } = await db.from("conversations").delete().eq("id", body.conversationId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       case "delete_feedback": {
         const { error } = await db.from("feedback").delete().eq("id", body.feedbackId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
-      // ── Update product ────────────────────────────────────────────────────
       case "toggle_product_active": {
         const { data: product } = await db.from("products").select("is_active").eq("id", body.productId).single();
         const { error } = await db.from("products").update({ is_active: !product?.is_active }).eq("id", body.productId);
         if (error) throw error;
-        return NextResponse.json({ success: true, is_active: !product?.is_active });
+        return json({ success: true, is_active: !product?.is_active });
       }
-
-      // ── Update order status ───────────────────────────────────────────────
       case "update_order_status": {
         const { error } = await db.from("orders").update({ status: body.status }).eq("id", body.orderId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
-      // ── Send message as admin (into an existing conversation) ─────────────
       case "send_admin_message": {
-        // Admin sends as the creator/user of the conversation using their profile
         const { error } = await db.from("messages").insert({
           conversation_id: body.conversationId,
-          sender_id: body.senderId, // must be a real profile id (user or creator in the conversation)
+          sender_id: body.senderId,
           body: body.body,
         });
         if (error) throw error;
-        // bump conversation updated_at
         await db.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", body.conversationId);
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
-      // ── Update profile ────────────────────────────────────────────────────
       case "update_profile": {
         const { userId, updates } = body;
         const { error } = await db.from("profiles").update(updates).eq("id", userId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
-      // ── Change user role ──────────────────────────────────────────────────
       case "change_role": {
         const { error } = await db.from("profiles").update({ role: body.role }).eq("id", body.userId);
         if (error) throw error;
-        return NextResponse.json({ success: true });
+        return json({ success: true });
       }
-
       default:
-        return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+        return json({ error: "Unknown action" }, 400);
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return json({ error: message }, 500);
   }
 }
