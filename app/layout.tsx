@@ -190,7 +190,36 @@ export const metadata: Metadata = {
   },
   description:
     "Discover authentic handmade crafts from independent Indian artisans. Shop pottery, textiles, woodwork, metal craft, and more — or open your studio on Kalakriti.",
-  keywords: ["handmade", "Indian crafts", "artisan marketplace", "pottery", "textiles", "handicrafts", "India"],
+  keywords: [
+    "handmade crafts India",
+    "Indian artisan marketplace",
+    "buy handmade online India",
+    "pottery artisan India",
+    "Banarasi weave online",
+    "blue pottery Jaipur",
+    "dokra craft buy",
+    "pattachitra paintings",
+    "warli art online",
+    "handmade gifts India",
+    "independent artisans India",
+    "Kalakriti",
+  ],
+  metadataBase: new URL("https://kalakrithi.vercel.app"),
+  openGraph: {
+    siteName: "Kalakriti",
+    type: "website",
+    locale: "en_IN",
+    images: [{ url: "/logo.png", width: 400, height: 400, alt: "Kalakriti" }],
+  },
+  twitter: {
+    card: "summary",
+    site: "@kalakriti",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
 };
 
 export default function RootLayout({

@@ -463,6 +463,9 @@ export type Profile = {
   city: string | null;
   state: string | null;
   whatsapp: string | null;
+  instagram_url: string | null;
+  website_url: string | null;
+  youtube_url: string | null;
   years_experience: number | null;
   available_for_commissions: boolean;
   onboarding_complete: boolean | null;

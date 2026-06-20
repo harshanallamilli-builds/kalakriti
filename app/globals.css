@@ -3565,3 +3565,96 @@ body:has(.creator-portfolio-root) .cp-global-nav {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
+/* ── Auth social links block ─────────────────────────────────────────────── */
+.auth-social-links {
+  margin-top: 0.5rem;
+  padding: 0.875rem;
+  background: rgba(245,240,232,0.5);
+  border: 1px solid var(--linen);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-social-links__label {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warm-gray);
+  margin-bottom: 0.25rem;
+}
+
+.auth-social-links__optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: rgba(145,128,112,0.7);
+}
+
+/* ── Creator profile social links ────────────────────────────────────────── */
+.cp-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Creator footer contact options ─────────────────────────────────────── */
+.cp-footer-cta__contact-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.cp-footer-cta__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  background: #25D366;
+  color: #fff;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.cp-footer-cta__whatsapp:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.cp-footer-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.cp-footer-social__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--linen);
+  color: var(--warm-gray);
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.cp-footer-social__link:hover {
+  color: var(--charcoal);
+  border-color: var(--charcoal);
+  background: var(--sand);
+}
