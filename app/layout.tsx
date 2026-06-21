@@ -228,7 +228,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className="antialiased"
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -246,7 +246,7 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-screen flex-col">
         <AuthProvider>
           <LenisProvider>
             <Navbar />

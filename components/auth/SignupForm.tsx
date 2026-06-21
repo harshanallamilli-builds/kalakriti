@@ -1,5 +1,7 @@
 // "use client";
 
+// import { LinksEditor } from "@/components/creators/LinksEditor";
+
 // import { useActionState, useState, useEffect } from "react";
 // import { useSearchParams, useRouter } from "next/navigation";
 // import Link from "next/link";
@@ -474,6 +476,8 @@ import { Select } from "@/components/ui/Select";
 import { INDIAN_STATES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
+import { LinksEditor } from "@/components/creators/LinksEditor";
+
 
 const initial: AuthState = {};
 
@@ -721,23 +725,7 @@ export function SignupForm() {
               focused={focused} onFocus={setFocused} onBlur={() => setFocused(null)}
               icon={<svg fill="none" viewBox="0 0 20 20" width="16" height="16"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zM7 8c.5-1.5 2-2 3-1s1 2.5 0 3l-1 1c.5 1 1.5 2 2.5 2.5l1-1c1-1 2.5-.5 3 .5s0 2.5-1.5 3C12 17 7 14 7 8z" stroke="currentColor" strokeWidth="1.3"/></svg>}
             />
-            <div className="auth-social-links">
-              <p className="auth-social-links__label">
-                Your links <span className="auth-social-links__optional">(optional — add now or later)</span>
-              </p>
-              <AuthField
-                id="su-instagram" label="Instagram URL" name="instagram_url"
-                placeholder="https://instagram.com/yourstudio"
-                focused={focused} onFocus={setFocused} onBlur={() => setFocused(null)}
-                icon={<svg fill="none" viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="2" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.4"/><circle cx="10" cy="10" r="3.2" stroke="currentColor" strokeWidth="1.4"/><circle cx="14.2" cy="5.8" r="0.8" fill="currentColor"/></svg>}
-              />
-              <AuthField
-                id="su-website" label="Personal website" name="website_url"
-                placeholder="https://yourwebsite.com"
-                focused={focused} onFocus={setFocused} onBlur={() => setFocused(null)}
-                icon={<svg fill="none" viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.4"/><path d="M2 10h16M10 2a12 12 0 0 1 0 16M10 2a12 12 0 0 0 0 16" stroke="currentColor" strokeWidth="1.2"/></svg>}
-              />
-            </div>
+            <LinksEditor fieldName="links" />
           </div>
         )}
 

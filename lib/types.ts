@@ -7,6 +7,11 @@
 //   | "completed"
 //   | "cancelled";
 
+// export type CreatorLink = {
+//   label: string;
+//   url: string;
+// };
+
 // export type Profile = {
 //   id: string;
 //   role: UserRole;
@@ -440,6 +445,10 @@
 //   updated_at: string;
 // };
 
+export type CreatorLink = {
+  label: string;
+  url: string;
+};
 
 export type UserRole = "user" | "creator";
 
@@ -466,6 +475,7 @@ export type Profile = {
   instagram_url: string | null;
   website_url: string | null;
   youtube_url: string | null;
+  links: CreatorLink[] | null;
   years_experience: number | null;
   available_for_commissions: boolean;
   onboarding_complete: boolean | null;
