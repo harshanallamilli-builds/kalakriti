@@ -204,6 +204,9 @@ export const metadata: Metadata = {
     "independent artisans India",
     "Kalakriti",
   ],
+  verification: {
+    google: "vz6DI1JDou_PR_7XmcIiJSmtvNebMk2x7AicWBYku50",
+  },
   metadataBase: new URL("https://kalakrithi.vercel.app"),
   openGraph: {
     siteName: "Kalakriti",
